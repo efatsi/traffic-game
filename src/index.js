@@ -24,20 +24,16 @@ for (let i = 0; i < 25; i++) {
   bunny.x = (i % 5) * 40;
   bunny.y = Math.floor(i / 5) * 40;
 
-  if (i == 0) {
-    bunny.scale.x = 0.2
-    bunny.scale.y = 0.2
+  bunny.scale.x = 0.35
+  bunny.scale.y = 0.25
 
-    bunny.interactive = true;
-    bunny.buttonMode = true;
-    bunny.on('pointertap', (event) => {
-      bunny.scale.x = 0.3 - bunny.scale.x
-      bunny.scale.y = 0.3 - bunny.scale.y
-    });
-  } else {
-    bunny.scale.x = 0.35
-    bunny.scale.y = 0.25
-  }
+  bunny.interactive = true;
+  bunny.buttonMode = true;
+  bunny.on('pointertap', (event) => {
+    console.log(event)
+    bunny.scale.x = 0.55 - bunny.scale.x
+    bunny.scale.y = 0.45 - bunny.scale.y
+  });
 
   container.addChild(bunny);
 }
