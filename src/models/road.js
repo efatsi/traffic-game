@@ -8,10 +8,10 @@ export default class Road {
     this.endY = endY
 
     this.graphics = new PIXI.Graphics()
-    this.render()
+    this.initializeGraphics()
   }
 
-  render() {
+  initializeGraphics() {
     this.graphics.lineStyle(20, 0x348aba)
     this.graphics.moveTo(this.startX, this.startY)
     this.graphics.lineTo(this.endX, this.endY)
