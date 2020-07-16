@@ -12,7 +12,7 @@ export default class Road {
   }
 
   initializeGraphics() {
-    this.graphics.lineStyle(20, 0x348aba)
+    this.graphics.lineStyle(8, 0x348aba)
     this.graphics.moveTo(this.startX, this.startY)
     this.graphics.lineTo(this.endX, this.endY)
   }
