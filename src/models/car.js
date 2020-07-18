@@ -21,18 +21,26 @@ export default class Car {
     this.graphics.endFill()
   }
 
-  tick(delta) {
-    this.graphics.clear()
-
-    const [x, y] = this.getMovement(delta)
-    this.currentX += x
-    this.currentY += y
-    this.render()
-
-    this.verifyDirection()
+  verifyDirection() {
+    if (this.atRoadEnd()) {
+      if (this.onLastRoad()) {
+        this.madeIt = true
+      } else {
+        if (this.nextRoad() && this.nextRoad().redLight()) {
+          // do nothing, wait at end of current road
+        } else {
+          this.moveToNextRoad()
+        }
+      }
+    }
   }
 
   getMovement(delta) {
+    // things that make you stop
+    if (this.atRoadEnd() && this.nextRoad().redLight()) {
+      return [0, 0]
+    }
+
     const xGap = this.currentX - this.currentRoad.endX
     const yGap = this.currentY - this.currentRoad.endY
     const angle = Math.atan(yGap / xGap)
@@ -49,25 +57,12 @@ export default class Car {
     return [x, y]
   }
 
-  verifyDirection() {
-    if (this.atRoadEnd()) {
-      if (this.onLastRoad()) {
-        this.madeIt = true
-      } else {
-        this.moveToNextRoad()
-      }
-    }
-  }
-
   onLastRoad() {
     return this.roads.indexOf(this.currentRoad) == this.roads.length - 1
   }
 
   moveToNextRoad() {
-    const currentIndex = this.roads.indexOf(this.currentRoad)
-    this.currentRoad = this.roads[currentIndex + 1]
-    this.currentX = this.currentRoad.startX
-    this.currentY = this.currentRoad.startY
+    this.currentRoad = this.nextRoad()
   }
 
   atRoadEnd() {
@@ -75,5 +70,21 @@ export default class Car {
     const yGap = this.currentY - this.currentRoad.endY
 
     return Math.abs(xGap) + Math.abs(yGap) < this.velocity
+  }
+
+  nextRoad() {
+    const currentIndex = this.roads.indexOf(this.currentRoad)
+    return this.roads[currentIndex + 1]
+  }
+
+  tick(delta) {
+    this.graphics.clear()
+
+    const [x, y] = this.getMovement(delta)
+    this.currentX += x
+    this.currentY += y
+    this.render()
+
+    this.verifyDirection()
   }
 }
