@@ -2,6 +2,8 @@ import * as PIXI from 'pixi.js'
 
 export default class Car {
   constructor(roads) {
+    this.allCars = []
+
     this.roads = roads
     this.currentRoad = roads[0]
     this.madeIt = false
@@ -36,11 +38,6 @@ export default class Car {
   }
 
   getMovement(delta) {
-    // things that make you stop
-    if (this.atRoadEnd() && this.nextRoad().redLight()) {
-      return [0, 0]
-    }
-
     const xGap = this.currentX - this.currentRoad.endX
     const yGap = this.currentY - this.currentRoad.endY
     const angle = Math.atan(yGap / xGap)
@@ -54,7 +51,26 @@ export default class Car {
     const x = Math.abs(xDistance) * xDirection * delta
     const y = Math.abs(yDistance) * yDirection * delta
 
-    return [x, y]
+    return this.shouldStop(x, y) ? [0, 0] : [x, y]
+  }
+
+  // takes intended direction, checks if should stop
+  shouldStop(x, y) {
+    let stop = false
+
+    // waiting for the light to turn green
+    if (this.atRoadEnd() && this.nextRoad().redLight()) {
+      stop = true
+    }
+
+    // check if there's a car where you want to go
+    this.allCars.forEach(otherCar => {
+      if (otherCar != this && this.distanceTo(x, y, otherCar) < 8 * 2) {
+        stop = true
+      }
+    })
+
+    return stop
   }
 
   onLastRoad() {
@@ -77,7 +93,18 @@ export default class Car {
     return this.roads[currentIndex + 1]
   }
 
-  tick(delta) {
+  distanceTo(x, y, otherCar) {
+    const sum =
+      Math.pow(this.currentX + x - otherCar.currentX, 2) +
+      Math.pow(this.currentY + y - otherCar.currentY, 2)
+
+    return Math.sqrt(sum)
+  }
+
+  tick(delta, cars) {
+    // Update reference of all cars
+    this.allCars = cars
+
     this.graphics.clear()
 
     const [x, y] = this.getMovement(delta)

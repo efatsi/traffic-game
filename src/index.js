@@ -47,11 +47,10 @@ function onPointerDown() {
 // Make cars move
 app.ticker.add(delta => {
   cars.forEach(c => {
-    c.tick(delta)
+    c.tick(delta, cars)
   })
 
   // Render closed intersections first so the red is on the bottom
-  debugger
   intersections.forEach(i => {
     i.tick()
   })
