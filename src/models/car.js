@@ -1,6 +1,8 @@
 import * as PIXI from 'pixi.js'
 
 export default class Car {
+  maxAccel = 0.035
+
   constructor(roads) {
     this.roads = roads
     this.currentRoad = roads[0]
@@ -8,7 +10,8 @@ export default class Car {
 
     this.currentX = roads[0].startX
     this.currentY = roads[0].startY
-    this.initialVelocity = this.velocity = 3
+    this.initialVelocity = this.velocity = 2
+    this.nextObstacle = roads[1]
 
     this.graphics = new PIXI.Graphics()
     this.render()
@@ -19,6 +22,7 @@ export default class Car {
     this.graphics.beginFill(0xde3249, 1)
     this.graphics.drawCircle(this.currentX, this.currentY, 8)
     this.graphics.endFill()
+    debugger
   }
 
   verifyDirection() {
@@ -35,21 +39,35 @@ export default class Car {
     }
   }
 
-  adjustVelocity() {
-    if (this.currentX > 200 && this.velocity > 0) {
-      this.velocity -= 0.035
-    }
+  determineObstacle() {
+    // todo, only look forward
+    // todo, count in cars
+    const intersections = this.roads.filter(r => {
+      return r.intersection && !r.open
+    })
 
-    if (this.velocity < 0) {
-      console.log(
-        'Initial velocity:',
-        this.initialVelocity,
-        '. Distance to stop:',
-        this.currentX - 200
-      )
-      this.velocity = 0
-    } else if (this.velocity > 3) {
-      this.velocity = 3
+    this.nextObstacle = intersections[0]
+  }
+
+  adjustVelocity() {
+    if (this.nextObstacle) {
+      let distanceToObstacle = this.nextObstacle.startX - 10 - this.currentX
+      let distanceToZero = Math.pow(this.velocity, 2) / (2 * this.maxAccel)
+
+      if (this.velocity > 0 && distanceToObstacle <= distanceToZero) {
+        this.velocity -= this.maxAccel
+
+        if (this.velocity < this.maxAccel) {
+          console.log('Stopped at:', this.currentX)
+          this.velocity = 0
+        }
+      }
+    } else {
+      this.velocity += this.maxAccel
+
+      if (this.velocity > 2) {
+        this.velocity = 2
+      }
     }
   }
 
@@ -113,6 +131,7 @@ export default class Car {
   tick(delta) {
     this.graphics.clear()
 
+    this.determineObstacle()
     this.adjustVelocity()
     const [x, y] = this.getMovement(delta)
     this.currentX += x
