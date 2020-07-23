@@ -2,15 +2,13 @@ import * as PIXI from 'pixi.js'
 
 export default class Car {
   constructor(roads) {
-    this.allCars = []
-
     this.roads = roads
     this.currentRoad = roads[0]
     this.madeIt = false
 
     this.currentX = roads[0].startX
     this.currentY = roads[0].startY
-    this.velocity = 2
+    this.initialVelocity = this.velocity = 3
 
     this.graphics = new PIXI.Graphics()
     this.render()
@@ -34,6 +32,24 @@ export default class Car {
           this.moveToNextRoad()
         }
       }
+    }
+  }
+
+  adjustVelocity() {
+    if (this.currentX > 200 && this.velocity > 0) {
+      this.velocity -= 0.035
+    }
+
+    if (this.velocity < 0) {
+      console.log(
+        'Initial velocity:',
+        this.initialVelocity,
+        '. Distance to stop:',
+        this.currentX - 200
+      )
+      this.velocity = 0
+    } else if (this.velocity > 3) {
+      this.velocity = 3
     }
   }
 
@@ -62,13 +78,6 @@ export default class Car {
     if (this.atRoadEnd() && this.nextRoad().redLight()) {
       stop = true
     }
-
-    // check if there's a car where you want to go
-    this.allCars.forEach(otherCar => {
-      if (otherCar != this && this.distanceTo(x, y, otherCar) < 8 * 2) {
-        stop = true
-      }
-    })
 
     return stop
   }
@@ -101,12 +110,10 @@ export default class Car {
     return Math.sqrt(sum)
   }
 
-  tick(delta, cars) {
-    // Update reference of all cars
-    this.allCars = cars
-
+  tick(delta) {
     this.graphics.clear()
 
+    this.adjustVelocity()
     const [x, y] = this.getMovement(delta)
     this.currentX += x
     this.currentY += y
@@ -115,3 +122,12 @@ export default class Car {
     this.verifyDirection()
   }
 }
+
+;[2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0].forEach(v => {
+  console.log(
+    'Initial velocity:',
+    v,
+    '. Calculated distance to stop:',
+    (v * v) / 0.07
+  )
+})

@@ -38,7 +38,7 @@ export default class Road {
   }
 
   // intersections only
-  // optimization available by not repainint every tick
+  // optimization available by not repainting every tick
   tick() {
     this.graphics.clear()
 
