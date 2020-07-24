@@ -1,6 +1,9 @@
 import * as PIXI from 'pixi.js'
 
 export default class Road {
+  cars = []
+  graphics = new PIXI.Graphics()
+
   constructor(startX, startY, endX, endY, intersection, open) {
     this.startX = startX
     this.startY = startY
@@ -15,7 +18,6 @@ export default class Road {
       }, 4000)
     }
 
-    this.graphics = new PIXI.Graphics()
     this.render()
   }
 
