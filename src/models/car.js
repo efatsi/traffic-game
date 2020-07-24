@@ -1,20 +1,34 @@
 import * as PIXI from 'pixi.js'
 
+class Obstacle {
+  constructor(object) {
+    this.object = object
+
+    if (object.constructor.name == 'Car') {
+      this.leftX = object.currentX - object.radius - 10
+      this.y = object.currentY
+    } else if (object.constructor.name == 'Road') {
+      this.leftX = object.startX - 10
+      this.y = object.startY
+    }
+  }
+}
+
 export default class Car {
   graphics = new PIXI.Graphics()
+  radius = 8
 
   maxAccel = 0.035
   maxVelocity = 2
 
   constructor(roads) {
     this.roads = roads
-    this.currentRoad = roads[0]
+    this.setCurrentRoad(roads[0])
     this.madeIt = false
 
     this.currentX = roads[0].startX
     this.currentY = roads[0].startY
     this.initialVelocity = this.velocity = this.maxVelocity
-    this.nextObstacle = roads[1]
 
     this.render()
   }
@@ -22,24 +36,43 @@ export default class Car {
   render() {
     this.graphics.lineStyle(0.75, 0xffffff)
     this.graphics.beginFill(0xde3249, 1)
-    this.graphics.drawCircle(this.currentX, this.currentY, 8)
+    this.graphics.drawCircle(this.currentX, this.currentY, this.radius)
     this.graphics.endFill()
-    debugger
   }
 
   determineObstacle() {
-    // todo, only look forward
-    // todo, count in cars
-    const intersections = this.roads.filter(r => {
-      return r.intersection && !r.open
-    })
+    const currentRoadIndex = this.currentRoad.cars.indexOf(this)
+    let obstacle = this.currentRoad.cars[currentRoadIndex + 1]
 
-    this.nextObstacle = intersections[0]
+    if (!obstacle) {
+      const futureRoads = this.roads.slice(
+        this.roads.indexOf(this.currentRoad) + 1,
+        this.roads.length
+      )
+
+      futureRoads.forEach(r => {
+        if (obstacle) return
+
+        if (r.intersection && !r.open) {
+          obstacle = r
+        } else {
+          obstacle = r.cars[0]
+        }
+      })
+    }
+
+    if (obstacle) {
+      this.nextObstacle = new Obstacle(obstacle)
+    } else {
+      this.nextObstacle = null
+    }
+
+    debugger
   }
 
   adjustVelocity() {
     if (this.nextObstacle) {
-      let distanceToObstacle = this.nextObstacle.startX - 10 - this.currentX
+      let distanceToObstacle = this.nextObstacle.leftX - this.currentX
       let distanceToZero = Math.pow(this.velocity, 2) / (2 * this.maxAccel)
 
       if (this.velocity > 0 && distanceToObstacle <= distanceToZero) {
@@ -97,16 +130,20 @@ export default class Car {
   }
 
   moveToNextRoad() {
-    // TODO: update this
-    // this.currentRoad.cars.remove(self)
+    this.currentRoad.cars = this.currentRoad.cars.filter(c => {
+      return c != this
+    })
 
     if (this.onLastRoad()) {
       this.madeIt = true
     } else {
-      this.currentRoad = this.nextRoad()
-      // TODO: update this
-      // this.currentRoad.cars.push(self)
+      this.setCurrentRoad(this.nextRoad())
     }
+  }
+
+  setCurrentRoad(road) {
+    this.currentRoad = road
+    road.cars.unshift(this)
   }
 
   onLastRoad() {

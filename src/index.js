@@ -22,7 +22,7 @@ app.stage.addChild(intersectionContainer)
 // Build the scene
 const road = new Road(25, 200, 170, 200)
 app.stage.addChild(road.graphics)
-const intersection = new Road(170, 200, 230, 200, true, false)
+const intersection = new Road(170, 200, 230, 200, true, true)
 intersectionContainer.addChild(intersection.graphics)
 intersections.push(intersection)
 const road2 = new Road(230, 200, 375, 200)
@@ -57,3 +57,7 @@ app.ticker.add(delta => {
     return !c.madeIt
   })
 })
+
+// setInterval(() => {
+//   console.log([road.cars.length, intersection.cars.length, road2.cars.length])
+// }, 250)
