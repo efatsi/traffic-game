@@ -27,20 +27,6 @@ export default class Car {
     debugger
   }
 
-  verifyDirection() {
-    if (this.atRoadEnd()) {
-      if (this.onLastRoad()) {
-        this.madeIt = true
-      } else {
-        if (this.nextRoad() && this.nextRoad().redLight()) {
-          // do nothing, wait at end of current road
-        } else {
-          this.moveToNextRoad()
-        }
-      }
-    }
-  }
-
   determineObstacle() {
     // todo, only look forward
     // todo, count in cars
@@ -60,7 +46,6 @@ export default class Car {
         this.velocity -= this.maxAccel
 
         if (this.velocity < this.maxAccel) {
-          console.log('Stopped at:', this.currentX)
           this.velocity = 0
         }
       }
@@ -90,12 +75,18 @@ export default class Car {
     return [x, y]
   }
 
-  onLastRoad() {
-    return this.roads.indexOf(this.currentRoad) == this.roads.length - 1
-  }
-
-  moveToNextRoad() {
-    this.currentRoad = this.nextRoad()
+  verifyDirection() {
+    if (this.atRoadEnd()) {
+      if (
+        this.nextRoad() &&
+        this.nextRoad().redLight() &&
+        this.basicallyStopped()
+      ) {
+        // do nothing, wait at end of current road
+      } else {
+        this.moveToNextRoad()
+      }
+    }
   }
 
   atRoadEnd() {
@@ -105,17 +96,30 @@ export default class Car {
     return Math.abs(xGap) + Math.abs(yGap) < this.velocity
   }
 
+  moveToNextRoad() {
+    // TODO: update this
+    // this.currentRoad.cars.remove(self)
+
+    if (this.onLastRoad()) {
+      this.madeIt = true
+    } else {
+      this.currentRoad = this.nextRoad()
+      // TODO: update this
+      // this.currentRoad.cars.push(self)
+    }
+  }
+
+  onLastRoad() {
+    return this.roads.indexOf(this.currentRoad) == this.roads.length - 1
+  }
+
   nextRoad() {
     const currentIndex = this.roads.indexOf(this.currentRoad)
     return this.roads[currentIndex + 1]
   }
 
-  distanceTo(x, y, otherCar) {
-    const sum =
-      Math.pow(this.currentX + x - otherCar.currentX, 2) +
-      Math.pow(this.currentY + y - otherCar.currentY, 2)
-
-    return Math.sqrt(sum)
+  basicallyStopped() {
+    return this.velocity < this.maxAccel * 2
   }
 
   tick(delta) {
