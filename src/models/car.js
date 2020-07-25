@@ -5,11 +5,11 @@ class Obstacle {
     this.object = object
 
     if (object.constructor.name == 'Car') {
-      this.leftX = object.currentX - object.radius - 10
+      this.leftX = object.currentX - object.radius
       this.velocity = object.velocity
       this.y = object.currentY
     } else if (object.constructor.name == 'Road') {
-      this.leftX = object.startX - 10
+      this.leftX = object.startX
       this.velocity = 0
       this.y = object.startY
     }
@@ -19,6 +19,7 @@ class Obstacle {
 export default class Car {
   graphics = new PIXI.Graphics()
   radius = 8
+  stopBuffer = 10
 
   maxAccel = 0.035
   maxVelocity = 2
@@ -72,7 +73,16 @@ export default class Car {
   }
 
   adjustVelocity() {
-    if (this.shouldSlowDown()) {
+    // if close to nextObstacle and it's stopped and you're stopped
+    //  - stop
+    // if shouldSlowDown()
+    //  - slowDown
+    // else
+    //  - speedUp
+
+    if (this.basicallyStopped() && this.shouldStop()) {
+      this.velocity = 0
+    } else if (this.shouldSlowDown()) {
       this.velocity -= this.maxAccel
 
       if (this.velocity < this.maxAccel) {
@@ -87,14 +97,24 @@ export default class Car {
     }
   }
 
+  shouldStop() {
+    if (this.nextObstacle) {
+      let distanceToObstacle = this.nextObstacle.leftX - this.currentX
+      return distanceToObstacle < this.stopBuffer
+    }
+  }
+
   shouldSlowDown() {
     if (this.nextObstacle) {
       let distanceToObstacle = this.nextObstacle.leftX - this.currentX
       let distanceToZero =
-        (this.velocity * (this.velocity + this.nextObstacle.velocity)) /
+        (Math.pow(this.velocity, 2) - Math.pow(this.nextObstacle.velocity, 2)) /
         (2 * this.maxAccel)
 
-      if (this.velocity > 0 && distanceToObstacle <= distanceToZero) {
+      if (
+        this.velocity > 0 &&
+        distanceToObstacle - this.stopBuffer <= distanceToZero
+      ) {
         return true
       }
     }
