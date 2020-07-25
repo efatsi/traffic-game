@@ -6,9 +6,11 @@ class Obstacle {
 
     if (object.constructor.name == 'Car') {
       this.leftX = object.currentX - object.radius - 10
+      this.velocity = object.velocity
       this.y = object.currentY
     } else if (object.constructor.name == 'Road') {
       this.leftX = object.startX - 10
+      this.velocity = 0
       this.y = object.startY
     }
   }
@@ -88,7 +90,9 @@ export default class Car {
   shouldSlowDown() {
     if (this.nextObstacle) {
       let distanceToObstacle = this.nextObstacle.leftX - this.currentX
-      let distanceToZero = Math.pow(this.velocity, 2) / (2 * this.maxAccel)
+      let distanceToZero =
+        (this.velocity * (this.velocity + this.nextObstacle.velocity)) /
+        (2 * this.maxAccel)
 
       if (this.velocity > 0 && distanceToObstacle <= distanceToZero) {
         return true
