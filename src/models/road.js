@@ -15,7 +15,7 @@ export default class Road {
 
       setInterval(() => {
         this.open = !this.open
-      }, 2000)
+      }, 4000)
     }
 
     this.render()

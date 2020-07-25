@@ -28,7 +28,8 @@ export default class Car {
 
     this.currentX = roads[0].startX
     this.currentY = roads[0].startY
-    this.initialVelocity = this.velocity = this.maxVelocity
+    // TODO: if car close, come in at same speed as car
+    this.velocity = this.maxVelocity
 
     this.render()
   }
@@ -66,21 +67,14 @@ export default class Car {
     } else {
       this.nextObstacle = null
     }
-
-    debugger
   }
 
   adjustVelocity() {
-    if (this.nextObstacle) {
-      let distanceToObstacle = this.nextObstacle.leftX - this.currentX
-      let distanceToZero = Math.pow(this.velocity, 2) / (2 * this.maxAccel)
+    if (this.shouldSlowDown()) {
+      this.velocity -= this.maxAccel
 
-      if (this.velocity > 0 && distanceToObstacle <= distanceToZero) {
-        this.velocity -= this.maxAccel
-
-        if (this.velocity < this.maxAccel) {
-          this.velocity = 0
-        }
+      if (this.velocity < this.maxAccel) {
+        this.velocity = 0
       }
     } else {
       this.velocity += this.maxAccel
@@ -89,6 +83,19 @@ export default class Car {
         this.velocity = this.maxVelocity
       }
     }
+  }
+
+  shouldSlowDown() {
+    if (this.nextObstacle) {
+      let distanceToObstacle = this.nextObstacle.leftX - this.currentX
+      let distanceToZero = Math.pow(this.velocity, 2) / (2 * this.maxAccel)
+
+      if (this.velocity > 0 && distanceToObstacle <= distanceToZero) {
+        return true
+      }
+    }
+
+    return false
   }
 
   getMovement(delta) {
