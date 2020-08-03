@@ -4,11 +4,12 @@ class Obstacle {
   constructor(object) {
     this.object = object
 
+    console.log(object.constructor.name)
     if (object.constructor.name == 'Car') {
       this.leftX = object.currentX - object.radius
       this.velocity = object.velocity
       this.y = object.currentY
-    } else if (object.constructor.name == 'Road') {
+    } else if (object.constructor.name == 'IntersectionSegment') {
       this.leftX = object.startX
       this.velocity = 0
       this.y = object.startY
@@ -57,7 +58,7 @@ export default class Car {
       futureRoads.forEach(r => {
         if (obstacle) return
 
-        if (r.intersection && !r.open) {
+        if (r.isIntersection() && !r.open) {
           obstacle = r
         } else {
           obstacle = r.cars[0]
@@ -143,6 +144,7 @@ export default class Car {
     if (this.atRoadEnd()) {
       if (
         this.nextRoad() &&
+        this.nextRoad().isIntersection() &&
         this.nextRoad().redLight() &&
         this.basicallyStopped()
       ) {

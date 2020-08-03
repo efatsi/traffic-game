@@ -1,6 +1,8 @@
 import './style.css'
 import * as PIXI from 'pixi.js'
-import Road from './models/road'
+
+import RoadSegment from './models/roadSegment'
+import IntersectionSegment from './models/intersectionSegment'
 import Car from './models/car'
 
 // Set up main canvas
@@ -20,12 +22,12 @@ intersectionContainer.sortableChildren = true
 app.stage.addChild(intersectionContainer)
 
 // Build the scene
-const road = new Road(25, 200, 170, 200)
+const road = new RoadSegment(25, 200, 170, 200)
 app.stage.addChild(road.graphics)
-const intersection = new Road(170, 200, 230, 200, true, false)
+const intersection = new IntersectionSegment(170, 200, 230, 200, false)
 intersectionContainer.addChild(intersection.graphics)
 intersections.push(intersection)
-const road2 = new Road(230, 200, 375, 200)
+const road2 = new RoadSegment(230, 200, 375, 200)
 app.stage.addChild(road2.graphics)
 
 // Click to add cars
